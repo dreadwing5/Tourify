@@ -14,8 +14,8 @@ app.use(express.json()); //this middleware - it simply add the data from the bod
 const tours = JSON.parse(
   fs.readFileSync(`${__dirname}/dev-data/data/tours-simple.json`)
 );
-//We can use v1 so that whenever we want to do some changes to our api we can just branch off to v2 and make the change their while the old one will still be intact
-app.get("/api/v1/tours", (req, res) => {
+
+const getAllTours = (req, res) => {
   res.status(200).json({
     status: "success",
     results: tours.length,
@@ -23,9 +23,9 @@ app.get("/api/v1/tours", (req, res) => {
       tours,
     },
   });
-});
+};
 
-app.get("/api/v1/tours/:id", (req, res) => {
+const getTour = (req, res) => {
   const id = req.params.id * 1; //short trick to convert the string to a number
   const tour = tours.find((el) => el.id === id);
   // if (id > tours.length) {
@@ -39,9 +39,9 @@ app.get("/api/v1/tours/:id", (req, res) => {
       tour,
     },
   });
-});
+};
 
-app.post("/api/v1/tours", (req, res) => {
+const createTour = (req, res) => {
   // console.log(req.body);
   const newId = tours[tours.length - 1].id + 1;
   const newTour = Object.assign({ id: newId }, req.body);
@@ -59,11 +59,9 @@ app.post("/api/v1/tours", (req, res) => {
       });
     }
   );
-});
+};
 
-//patch - update only some properties
-//put - update the entire file
-app.patch("/api/v1/tours/:id", (req, res) => {
+const updateTour = (req, res) => {
   if (req.params.id * 1 > tours.length) {
     return res.status(404).json({ status: "fail", message: "invalid ID" });
   }
@@ -73,9 +71,9 @@ app.patch("/api/v1/tours/:id", (req, res) => {
       tour: "<Updated tour here...>",
     },
   });
-});
+};
 
-app.delete("/api/v1/tours/:id", (req, res) => {
+const deleteTour = (req, res) => {
   if (req.params.id * 1 > tours.length) {
     return res.status(404).json({ status: "fail", message: "invalid ID" });
   }
@@ -84,7 +82,29 @@ app.delete("/api/v1/tours/:id", (req, res) => {
     status: "success",
     data: null, //data that we deleted no longer exist
   });
-});
+};
+
+/* 
+//We can use v1 so that whenever we want to do some changes to our api we can just branch off to v2 and make the change their while the old one will still be intact
+// app.get("/api/v1/tours", getAllTours);
+// app.post("/api/v1/tours", createTour);
+ app.get("/api/v1/tours/:id", getTour);
+
+app.patch("/api/v1/tours/:id", updateTour);
+
+//patch - update only some properties
+//put - update the entire file
+
+app.delete("/api/v1/tours/:id", deleteTour);
+ */
+
+app.route("/api/v1/tours").get(getAllTours).post(createTour);
+
+app
+  .route("/api/v1/tours/:id")
+  .get(getTour)
+  .patch(updateTour)
+  .delete(deleteTour);
 
 const port = 3000;
 app.listen(port, () => {
