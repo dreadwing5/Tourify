@@ -1,4 +1,3 @@
-const { EPROTONOSUPPORT } = require("constants");
 const fs = require("fs");
 
 const tours = JSON.parse(
@@ -6,15 +5,10 @@ const tours = JSON.parse(
 );
 
 exports.checkID = (req, res, next, val) => {
-  console.log("Tour id is : ${val}");
+  console.log(`Tour id is : ${val}`);
   if (req.params.id * 1 > tours.length) {
     return res.status(404).json({ status: "fail", message: "invalid ID" });
   }
-  //204 - Delete request, when the status is success but the data is null
-  res.status(204).json({
-    status: "success",
-    data: null, //data that we deleted no longer exist
-  });
   next();
 };
 
@@ -52,21 +46,24 @@ exports.getTour = (req, res) => {
 };
 
 exports.createTour = (req, res) => {
-  // console.log(req.body);
   const newId = tours[tours.length - 1].id + 1;
-  const newTour = Object.assign({ id: newId }, req.body);
+  const newTour = { ...req.body, id: newId };
   tours.push(newTour);
   fs.writeFile(
     `${__dirname}/dev-data/data/tours-simple.json`,
     JSON.stringify(tours),
     (err) => {
-      //201 - file created
-      res.status(201).json({
-        status: "success",
-        data: {
-          tour: newTour,
-        },
-      });
+      if (err) {
+        console.error(err);
+      } else {
+        //201 - file created
+        res.status(201).json({
+          status: "success",
+          data: {
+            tour: newTour,
+          },
+        });
+      }
     }
   );
 };
