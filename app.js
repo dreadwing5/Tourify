@@ -17,13 +17,8 @@ app.use(express.json()); //this middleware - it simply add the data from the bod
 app.use(express.static(`${__dirname}/public`));
 
 app.use((req, res, next) => {
-  console.log("Hello from the middleware 👋");
-  next();
-});
-
-app.use((req, res, next) => {
   req.requestTime = new Date().toISOString();
-  console.log(req.requestTime);
+  console.log(`Requested at ${req.requestTime}`);
   next();
 });
 
@@ -33,5 +28,4 @@ app.use("/api/v1/tours", tourRouter);
 app.use("/api/v1/users", userRouter);
 
 //start server
-
 module.exports = app;
