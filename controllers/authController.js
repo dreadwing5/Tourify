@@ -63,9 +63,15 @@ exports.login = catchAsync(async (req, res, next) => {
 
   // 3) Generate JWT and send it back to the client
   const token = signToken(user._id);
+
+  //Remove the password from the response
+  user.password = undefined;
   res.status(200).json({
     status: "success",
     token,
+    data: {
+      user,
+    },
   });
 });
 
